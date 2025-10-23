@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  api:
+    build:
+      context: ./FastFinance_BackEnd
+      dockerfile: Dockerfile
+    ports:
+      - '3333:3333'
+    container_name: fastfinance_api
+    restart: always
+    env_file:
+      - ./FastFinance_BackEnd/.env
+    networks:
+      - fastFinance
+    depends_on:
+      - db
+      
+  frontend: 
+    build:
+      context: ./fast_finance_front
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    container_name: fastfinance_front
+    restart: always
+    networks:
+      - fastFinance
+    depends_on:
+      - api
+      
+  db:
+    image: postgres:16
+    restart: always
+    container_name: fastfinance_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=fastFinance
+    ports:
+      - '5435:5432'
+    networks:
+      - fastFinance
+    volumes:
+      - ./docker/db-data:/var/lib/postgresql/data
+  
+networks:
+  fastFinance:
