@@ -1,15 +1,18 @@
 import { ChatBotService } from '@app/chat_bot_service/chat_bot.service';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import CreateTransaction from '@use-cases/transactions/create-transaction';
+import { RabbitmqService } from 'src/rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class BotService implements OnModuleInit {
   private readonly logger = new Logger(BotService.name);
   private bot: any;
+
   constructor(
     private readonly chatBotService: ChatBotService,
     private readonly createTransaction: CreateTransaction,
-  ) {}
+    private readonly rabbitmqService: RabbitmqService, 
+  ) { }
 
   onModuleInit() {
     const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -34,34 +37,24 @@ export class BotService implements OnModuleInit {
         })}`,
       );
 
-      const text = (msg.text || '').toLowerCase().trim(); //salgado 7
-      if (text) {
-        const res = await this.chatBotService.axiosChatBot(text);
-        if (!res.success) {
-          this.bot.sendMessage(
-            msg.chat.id,
-            'Não foi possível registrar a transação. Verifique os dados e tente novamente.',
-          );
-          return;
-        }
+      const text = (msg.text || '').toLowerCase().trim();
 
-        await this.createTransaction
-          .Execute(res.data)
-          .then(() => {
-            var messageToUser = `Registrado ${res.data.type} no dia ${res.data.date} na categoria ${res.data.category} no valor de ${res.data.value}`;
-            this.bot.sendMessage(msg.chat.id, messageToUser);
-          })
-          .catch((err) => {
-            this.logger.error(`Erro ao criar no banco: ${err.message}`);
-            this.bot.sendMessage(
-              msg.chat.id,
-              'Não foi possível registrar a transação. Verifique os dados e tente novamente.',
-            );
-          });
+      if (text) {
+        await this.rabbitmqService.publishTelegramMessage({
+          chatId: msg.chat.id,
+          text,
+          timestamp: new Date().toISOString(),
+        });
+
+        this.bot.sendMessage(
+          msg.chat.id,
+          '✅ Mensagem recebida! Processando...',
+        );
       } else {
         this.logger.error(`text vazio = ${text}`);
       }
     });
+
     this.logger.log('Telegram bot iniciado com polling: true.');
   }
 }

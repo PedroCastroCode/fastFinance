@@ -10,6 +10,8 @@ import { GlobalModule } from './global.module';
 import { TransactionsModule } from '@app/transactions/transactions.module';
 import { BotService } from '@app/telegram/telegramBot';
 import { ChatBotService } from '@app/chat_bot_service/chat_bot.service';
+import { RabbitmqService } from './rabbitmq/rabbitmq.service';
+import { RabbitWorkerService } from './rabbitmq/rabbit-worker.service';
 
 @Module({
   imports: [
@@ -18,9 +20,15 @@ import { ChatBotService } from '@app/chat_bot_service/chat_bot.service';
     UsersModule,
     TransactionsModule,
     AuthenticationModule,
-    GlobalModule
+    GlobalModule,
   ],
   controllers: [AppController],
-  providers: [AppService, BotService, ChatBotService],
+  providers: [
+    AppService,
+    BotService,
+    ChatBotService,
+    RabbitmqService,
+    RabbitWorkerService,
+  ],
 })
-export class AppModule {}
+export class AppModule { }
