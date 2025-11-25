@@ -54,7 +54,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-background">
+    <>
       <div className="absolute top-4 right-4">
         <SwitcherTheme />
       </div>
@@ -127,6 +127,6 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 }

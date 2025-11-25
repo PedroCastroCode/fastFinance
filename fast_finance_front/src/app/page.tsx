@@ -1,9 +1,9 @@
-import SwitcherTheme from "@/components/SwitcherTheme";
+import LoginPage from "./auth/login/page";
 
 export default function Home() {
   return (
-    <div className="flex items-center justify-center h-screen">
-      <SwitcherTheme />
+    <div className="min-h-dvh flex items-center justify-center bg-background">
+      <LoginPage />
     </div>
   );
 }
